@@ -17,6 +17,7 @@
       align-items: center;
       min-height: 100vh;
     }
+
     h1 {
       font-family: 'Anton', sans-serif;
       font-size: 2.4rem;
@@ -26,6 +27,7 @@
       text-transform: uppercase;
       text-align: center;
     }
+
     .subtitle {
       font-size: 0.95rem;
       color: #9ca3af;
@@ -33,6 +35,7 @@
       text-align: center;
       max-width: 90%;
     }
+
     .container {
       width: 100%;
       max-width: 600px;
@@ -42,6 +45,7 @@
       box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
       box-sizing: border-box;
     }
+
     select, textarea {
       width: 100%;
       background: #1f2937;
@@ -53,11 +57,13 @@
       margin-bottom: 12px;
       box-sizing: border-box;
     }
+
     .mode-description {
       font-size: 0.8rem;
       color: #9ca3af;
       margin-bottom: 20px;
     }
+
     button {
       background: #facc15;
       color: #111827;
@@ -69,9 +75,11 @@
       width: 100%;
       margin-bottom: 10px;
     }
+
     button:hover {
       background: #eab308;
     }
+
     .output {
       background: #0f172a;
       padding: 16px;
@@ -84,38 +92,56 @@
       line-height: 1.5;
       min-height: 120px;
     }
+
     .footer {
       margin-top: 40px;
       color: #6b7280;
       font-size: 0.85rem;
       text-align: center;
     }
+
     @media (max-width: 600px) {
-      h1 { font-size: 2rem; }
-      .output { font-size: 0.9rem; padding: 12px; }
-      textarea { font-size: 0.95rem; }
+      h1 {
+        font-size: 2rem;
+      }
+
+      .output {
+        font-size: 0.9rem;
+        padding: 12px;
+      }
+
+      textarea {
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
 <body>
   <h1>🦇 BatGPT</h1>
   <div class="subtitle">Choose your mode. Enter your mission. Get answers — like Batman would.</div>
+
   <div class="container">
     <select id="mode">
       <option value="detective">🕵️ Detective</option>
       <option value="leader">🦁 Leader</option>
       <option value="strategist">🧠 Strategist</option>
     </select>
-    <div class="mode-description" id="modeDesc">Detective → Fun, observational advice</div>
+    <div class="mode-description" id="modeDesc">
+      Detective → Fun, observational advice
+    </div>
+
     <textarea id="userInput" placeholder="Describe your mission..."></textarea>
     <button onclick="askBatman()">Ask Batman</button>
     <button onclick="replayVoice()">🔊 Speak Again</button>
+
     <div class="output" id="batResponse">🕶️ Waiting for your mission...</div>
   </div>
+
   <div class="footer">Forged in the shadows by Abdulrahman 👊</div>
 
   <script>
     let lastSpokenText = "";
+
     const modeDescriptions = {
       detective: "Detective → Fun, observational advice",
       leader: "Leader → Motivational, action-based",
@@ -130,24 +156,39 @@
       const input = document.getElementById('userInput').value.trim();
       const output = document.getElementById('batResponse');
       const mode = document.getElementById('mode').value;
-      if (!input) return alert("Enter your mission.");
+
+      if (!input) {
+        alert("Enter your mission.");
+        return;
+      }
+
       output.textContent = "📡 Engaging Batcomputer. Scanning...";
 
-      const res = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: input, mode })
-      });
+      try {
+        const res = await fetch("/api/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ prompt: input, mode })
+        });
 
-      const data = await res.json();
-      const message = data.message || "❌ Batman couldn't decrypt the intel.";
-      lastSpokenText = message;
-      typeText(message, output);
-      speak(message);
+        const data = await res.json();
+        const message = data.message?.trim() || "❌ Batman couldn't decrypt the intel.";
+        lastSpokenText = message;
+        typeText(message, output);
+        speak(message);
+
+      } catch (err) {
+        output.textContent = "❌ Problem connecting with Batcomputer. Try again.";
+        console.error(err);
+      }
     }
 
     function replayVoice() {
-      if (lastSpokenText) speak(lastSpokenText);
+      if (lastSpokenText) {
+        speak(lastSpokenText);
+      }
     }
 
     function typeText(text, element) {
@@ -162,8 +203,11 @@
     }
 
     let isVoiceReady = false;
+    let savedUtterance = null;
+
     function speak(text) {
       const synth = window.speechSynthesis;
+
       const triggerSpeak = () => {
         const cleanedText = text.replace(/[*#~`^]/g, '');
         const utter = new SpeechSynthesisUtterance(cleanedText);
@@ -171,13 +215,19 @@
         utter.rate = 0.9;
         utter.pitch = 0.3;
         utter.volume = 1;
+
         const voices = synth.getVoices();
-        const voice = voices.find(v => v.name.includes("Google UK English Male")) || voices.find(v => v.lang === "en-GB") || voices[0];
+        const voice = voices.find(v => v.name.includes("Google UK English Male")) ||
+                      voices.find(v => v.lang === "en-GB") ||
+                      voices[0];
+
         if (voice) utter.voice = voice;
         synth.cancel();
         synth.speak(utter);
       };
+
       if (synth.getVoices().length === 0) {
+        savedUtterance = text;
         synth.onvoiceschanged = () => {
           if (!isVoiceReady) {
             isVoiceReady = true;
