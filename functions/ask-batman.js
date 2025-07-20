@@ -20,7 +20,7 @@ exports.handler = async function (event) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_OPENROUTER_API_KEY"
+        "Authorization": `Bearer ${process.env.batmangpt_api_secure}`
       },
       body: JSON.stringify({
         model,
@@ -32,7 +32,9 @@ exports.handler = async function (event) {
     });
 
     const data = await response.json();
-    const message = data.choices?.[0]?.message?.content.trim();
+    console.log("Raw API response:", data);
+
+    const message = data.choices?.[0]?.message?.content?.trim() || "❌ Batman couldn't decrypt the intel.";
 
     return {
       statusCode: 200,
