@@ -2,7 +2,7 @@
   "name": "batgpt-functions",
   "version": "1.0.0",
   "description": "Netlify Functions dependencies for BatGPT",
-  "main": "index.js"
+  "main": "index.js",
   "dependencies": {
     "node-fetch": "^2.6.7"
   }
