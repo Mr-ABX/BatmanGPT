@@ -1,6 +1,6 @@
 [build]
-  functions = "functions"
   publish = "."
+  functions = "functions"
 
 [[redirects]]
   from = "/api/ask"
