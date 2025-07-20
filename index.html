@@ -212,8 +212,8 @@
         const cleanedText = text.replace(/[*#~`^]/g, '');
         const utter = new SpeechSynthesisUtterance(cleanedText);
         utter.lang = "en-GB";
-        utter.rate = 0.9;
-        utter.pitch = 0.3;
+        utter.rate = 1;
+        utter.pitch = 0.4;
         utter.volume = 1;
 
         const voices = synth.getVoices();
